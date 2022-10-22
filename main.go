@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"flag"
+)
 
 func main() {
-	fmt.Println("Hello world")
+	flag.Parse()
+
+	arg := flag.Arg(0)
+
+	if arg == "c" {
+		client()
+	} else {
+		server()
+	}
 }

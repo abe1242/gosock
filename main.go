@@ -1,20 +1,18 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 )
 
 func main() {
-	flag.Parse()
 
-	arg := flag.Arg(0)
-
-	if arg == "c" {
+	if len(os.Args) < 2 {
+		fmt.Fprintf(os.Stderr, "Error: Invalid number of arguments\n")
+	} else if os.Args[1] == "c" {
 		client()
 	} else {
-		server()
+		server(os.Args[1])
 	}
 }
 

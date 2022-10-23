@@ -9,12 +9,10 @@ import (
 	"path"
 )
 
-func server() {
+func server(filepath string) {
 	const (
-		FILEPATH string = "go.mod"
-		HOST            = "0.0.0.0"
-		PORT            = "8888"
-		BUFSIZE  int    = 1024
+		HOST = "0.0.0.0"
+		PORT = "8888"
 	)
 
 	s, err := net.Listen("tcp", HOST+":"+PORT)
@@ -27,34 +25,30 @@ func server() {
 		check(err)
 		fmt.Printf("Connection from (%s)\n", conn.RemoteAddr())
 
-		f, err := os.Open(FILEPATH)
+		f, err := os.Open(filepath)
 		check(err)
 
 		///////////////////
 		fi, err := f.Stat()
 		check(err)
-		var FileSize int64 = fi.Size()
-		var StartFrom int64 = 0
-		var FileName string = path.Base(FILEPATH)
-		var FileNameLen uint16 = uint16(len([]byte(FileName)))
+		var (
+			FileSize    int64  = fi.Size()
+			FileName    string = path.Base(filepath)
+			FileNameLen uint16 = uint16(len([]byte(FileName)))
+			StartFrom   int64
+		)
 
 		binary.Write(conn, binary.BigEndian, FileSize)
-		binary.Write(conn, binary.BigEndian, StartFrom)
 		binary.Write(conn, binary.BigEndian, FileNameLen)
 
 		conn.Write([]byte(FileName))
-		//////////////////////
 
-		buf := make([]byte, BUFSIZE)
-		for {
-			n, err := f.Read(buf)
-			if err == io.EOF {
-				break
-			}
-			check(err)
+		// Read the byte to start from and set seek
+		binary.Read(conn, binary.BigEndian, &StartFrom)
+		f.Seek(StartFrom, io.SeekStart)
 
-			conn.Write(buf[:n])
-		}
+		// Send the file
+		io.Copy(conn, f)
 
 		f.Close()
 		conn.Close()

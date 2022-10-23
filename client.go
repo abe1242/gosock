@@ -4,17 +4,14 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 )
 
 func client() {
 	const (
-		FILENAME string = "file.out"
-		HOST            = "localhost"
-		PORT            = "8888"
-		BUFSIZE  int    = 1024
+		HOST = "localhost"
+		PORT = "8888"
 	)
 
 	// Establishing connection with server
@@ -22,50 +19,37 @@ func client() {
 	check(err)
 	defer conn.Close()
 
-	///////////////////////
+	// Define some header variables
 	var (
 		FileSize    int64
-		StartFrom   int64
 		FileNameLen uint16
 		FileName    string
+		StartFrom   int64 = 0
 	)
 
+	// Recieve header variables
 	binary.Read(conn, binary.BigEndian, &FileSize)
-	binary.Read(conn, binary.BigEndian, &StartFrom)
 	binary.Read(conn, binary.BigEndian, &FileNameLen)
 
+	// Get the filename
+	// Read as many bytes into buf as the FileNameLen variable
 	buf := make([]byte, FileNameLen)
-	bytesrecieved := 0
-	for {
-		if bytesrecieved < int(FileNameLen) {
-			n, err := conn.Read(buf[bytesrecieved:])
-			if err == io.EOF {
-				log.Fatal("This is wrang")
-			}
-			check(err)
-			fmt.Printf("Received %v bytes\n", n)
-
-			bytesrecieved += n
-		} else {
-			break
-		}
+	n, err := io.ReadFull(conn, buf)
+	check(err)
+	if n != int(FileNameLen) {
+		fmt.Fprintf(os.Stderr, "Error: Filename not received fully\n")
 	}
 	FileName = string(buf)
-	/////////////////////////
 
-	f, err := os.OpenFile(FileName, os.O_CREATE|os.O_WRONLY, 0666)
+	// Send the position to start from
+	binary.Write(conn, binary.BigEndian, StartFrom)
+
+	// Open file
+	f, err := os.OpenFile(FileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 	check(err)
 	defer f.Close()
 
-	// Getting the file data
-	buf = make([]byte, BUFSIZE)
-	for {
-		n, err := conn.Read(buf)
-		if err == io.EOF {
-			break
-		}
-		check(err)
-		f.Write(buf[:n])
-	}
-
+	// Copying the data to file
+	_, err = io.Copy(f, conn)
+	check(err)
 }

@@ -13,7 +13,7 @@ import (
 func Client(host, port string, contnue bool) {
 	// Establishing connection with server
 	conn, err := net.Dial("tcp", host+":"+port)
-	check(err)
+	checkExit(err)
 	defer conn.Close()
 
 	// Define some header variables
@@ -32,7 +32,7 @@ func Client(host, port string, contnue bool) {
 	// Read as many bytes into buf as the FileNameLen variable
 	buf := make([]byte, FileNameLen)
 	n, err := io.ReadFull(conn, buf)
-	check(err)
+	checkExit(err)
 	if n != int(FileNameLen) {
 		fmt.Fprintf(os.Stderr, "Error: Filename not received fully\n")
 	}
@@ -41,9 +41,9 @@ func Client(host, port string, contnue bool) {
 	// Get the filesize and set start byte if continue flag is present
 	if contnue {
 		f, err := os.Open(FileName)
-		check(err)
+		checkExit(err)
 		fi, err := f.Stat()
-		check(err)
+		checkExit(err)
 		StartFrom = fi.Size()
 		f.Close()
 	}
@@ -57,9 +57,9 @@ func Client(host, port string, contnue bool) {
 		openflags |= os.O_TRUNC
 	}
 	f, err := os.OpenFile(FileName, openflags, 0644)
-	check(err)
+	checkExit(err)
 	s, err := f.Seek(StartFrom, io.SeekStart)
-	check(err)
+	checkExit(err)
 	if contnue {
 		fmt.Printf("Resuming download from %v bytes\n", s)
 	}
@@ -71,5 +71,6 @@ func Client(host, port string, contnue bool) {
 		"Downloading",
 	)
 	_, err = io.Copy(io.MultiWriter(f, bar), conn)
-	check(err)
+	checkExit(err)
+	fmt.Printf("File '%v' downloaded successfully\n", FileName)
 }

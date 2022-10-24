@@ -14,23 +14,32 @@ import (
 func Server(fpath, host, port string) {
 	// Listening for connections
 	s, err := net.Listen("tcp", host+":"+port)
-	check(err)
+	checkExit(err)
 	fmt.Printf("Listening for connections at %v:%v\n", host, port)
 	defer s.Close()
 
 	for {
 		// Accepting connection
 		conn, err := s.Accept()
-		check(err)
-		fmt.Printf("Connection from (%s)\n", conn.RemoteAddr())
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			continue
+		}
+		fmt.Printf("\nConnection from (%s)\n", conn.RemoteAddr())
 
 		// Opening file to read from
 		f, err := os.Open(fpath)
-		check(err)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			continue
+		}
 
 		// Setting up header variables
 		fileinfo, err := f.Stat()
-		check(err)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			continue
+		}
 		var (
 			FileSize    int64  = fileinfo.Size()
 			FileName    string = filepath.Base(fpath)
@@ -53,7 +62,11 @@ func Server(fpath, host, port string) {
 			"Sending",
 		)
 		_, err = io.Copy(io.MultiWriter(conn, bar), f)
-		check(err)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			continue
+		}
+		fmt.Printf("File '%v' sent to %v successfully\n", FileName, conn.RemoteAddr())
 
 		f.Close()
 		conn.Close()

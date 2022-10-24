@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func check(err error) {
+func checkExit(err error) {
 	if err != nil {
 		// panic(err)
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)

@@ -20,5 +20,5 @@ elif [ $OSTYPE == "linux-android" ]; then
     fi
 
     mkdir -p $PREFIX/local/bin
-    mv gsoc $PREFIX/local/bin/
+    mv gso $PREFIX/local/bin/
 fi

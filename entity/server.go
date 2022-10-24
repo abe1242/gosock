@@ -6,10 +6,10 @@ import (
 	"io"
 	"net"
 	"os"
-	"path"
+	"path/filepath"
 )
 
-func Server(filepath, host, port string) {
+func Server(fpath, host, port string) {
 	// Listening for connections
 	s, err := net.Listen("tcp", host+":"+port)
 	check(err)
@@ -23,7 +23,7 @@ func Server(filepath, host, port string) {
 		fmt.Printf("Connection from (%s)\n", conn.RemoteAddr())
 
 		// Opening file to read from
-		f, err := os.Open(filepath)
+		f, err := os.Open(fpath)
 		check(err)
 
 		// Setting up header variables
@@ -31,7 +31,7 @@ func Server(filepath, host, port string) {
 		check(err)
 		var (
 			FileSize    int64  = fileinfo.Size()
-			FileName    string = path.Base(filepath)
+			FileName    string = filepath.Base(fpath)
 			FileNameLen uint16 = uint16(len([]byte(FileName)))
 			StartFrom   int64
 		)

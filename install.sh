@@ -19,6 +19,6 @@ elif [ $OSTYPE == "linux-android" ]; then
         source ~/.profile
     fi
 
-    mkdir -p $PREFIX/local/bin
-    mv gso $PREFIX/local/bin/
+    mkdir -p ~/.local/bin
+    mv gso ~/.local/bin
 fi

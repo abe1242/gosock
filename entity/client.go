@@ -6,6 +6,8 @@ import (
 	"io"
 	"net"
 	"os"
+
+	"github.com/schollz/progressbar/v3"
 )
 
 func Client(host, port string, contnue bool) {
@@ -64,6 +66,10 @@ func Client(host, port string, contnue bool) {
 	defer f.Close()
 
 	// Copying the data to file
-	_, err = io.Copy(f, conn)
+	bar := progressbar.DefaultBytes(
+		FileSize-StartFrom,
+		"Downloading",
+	)
+	_, err = io.Copy(io.MultiWriter(f, bar), conn)
 	check(err)
 }

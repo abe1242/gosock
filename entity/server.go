@@ -49,7 +49,7 @@ func Server(fpath, host, port string) {
 
 		// Send the file
 		bar := progressbar.DefaultBytes(
-			FileSize,
+			FileSize-StartFrom,
 			"Sending",
 		)
 		_, err = io.Copy(io.MultiWriter(conn, bar), f)

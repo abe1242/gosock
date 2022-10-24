@@ -8,14 +8,9 @@ import (
 	"os"
 )
 
-func client() {
-	const (
-		HOST = "localhost"
-		PORT = "8888"
-	)
-
+func client(host, port string, startbyte int64) {
 	// Establishing connection with server
-	conn, err := net.Dial("tcp", HOST+":"+PORT)
+	conn, err := net.Dial("tcp", host+":"+port)
 	check(err)
 	defer conn.Close()
 
@@ -24,7 +19,7 @@ func client() {
 		FileSize    int64
 		FileNameLen uint16
 		FileName    string
-		StartFrom   int64 = 0
+		StartFrom   int64 = startbyte
 	)
 
 	// Recieve header variables

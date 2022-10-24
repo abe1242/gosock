@@ -1,4 +1,4 @@
-package main
+package entity
 
 import (
 	"encoding/binary"
@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func client(host, port string, startbyte int64) {
+func Client(host, port string, contnue bool) {
 	// Establishing connection with server
 	conn, err := net.Dial("tcp", host+":"+port)
 	check(err)
@@ -19,7 +19,7 @@ func client(host, port string, startbyte int64) {
 		FileSize    int64
 		FileNameLen uint16
 		FileName    string
-		StartFrom   int64 = startbyte
+		StartFrom   int64 = 0
 	)
 
 	// Recieve header variables
@@ -36,12 +36,27 @@ func client(host, port string, startbyte int64) {
 	}
 	FileName = string(buf)
 
+	// Get the filesize and set start byte if continue flag is present
+	if contnue {
+		f, err := os.Open(FileName)
+		check(err)
+		fi, err := f.Stat()
+		check(err)
+		StartFrom = fi.Size()
+		f.Close()
+	}
+
 	// Send the position to start from
 	binary.Write(conn, binary.BigEndian, StartFrom)
 
 	// Open file
-	f, err := os.OpenFile(FileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+	f, err := os.OpenFile(FileName, os.O_CREATE|os.O_WRONLY, 0666)
 	check(err)
+	s, err := f.Seek(StartFrom, io.SeekStart)
+	check(err)
+	if contnue {
+		fmt.Printf("Resuming download from %v bytes\n", s)
+	}
 	defer f.Close()
 
 	// Copying the data to file

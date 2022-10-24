@@ -1,4 +1,4 @@
-package main
+package entity
 
 import (
 	"encoding/binary"
@@ -9,7 +9,7 @@ import (
 	"path"
 )
 
-func server(filepath, host, port string) {
+func Server(filepath, host, port string) {
 	// Listening for connections
 	s, err := net.Listen("tcp", host+":"+port)
 	check(err)

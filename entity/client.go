@@ -50,7 +50,11 @@ func Client(host, port string, contnue bool) {
 	binary.Write(conn, binary.BigEndian, StartFrom)
 
 	// Open file
-	f, err := os.OpenFile(FileName, os.O_CREATE|os.O_WRONLY, 0666)
+	openflags := os.O_CREATE | os.O_WRONLY
+	if !contnue {
+		openflags |= os.O_TRUNC
+	}
+	f, err := os.OpenFile(FileName, openflags, 0666)
 	check(err)
 	s, err := f.Seek(StartFrom, io.SeekStart)
 	check(err)

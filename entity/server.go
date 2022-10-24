@@ -7,6 +7,8 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+
+	"github.com/schollz/progressbar/v3"
 )
 
 func Server(fpath, host, port string) {
@@ -46,7 +48,11 @@ func Server(fpath, host, port string) {
 		f.Seek(StartFrom, io.SeekStart)
 
 		// Send the file
-		_, err = io.Copy(conn, f)
+		bar := progressbar.DefaultBytes(
+			FileSize,
+			"Sending",
+		)
+		_, err = io.Copy(io.MultiWriter(conn, bar), f)
 		check(err)
 
 		f.Close()

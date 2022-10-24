@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 if [ $OSTYPE == "linux-gnu" ]; then
     file="gso_linux_x86_64.tar.gz"
     curl -L "https://github.com/abe1242/gosock/releases/latest/download/$file" -o $file

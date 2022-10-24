@@ -54,7 +54,7 @@ func Client(host, port string, contnue bool) {
 	if !contnue {
 		openflags |= os.O_TRUNC
 	}
-	f, err := os.OpenFile(FileName, openflags, 0666)
+	f, err := os.OpenFile(FileName, openflags, 0644)
 	check(err)
 	s, err := f.Seek(StartFrom, io.SeekStart)
 	check(err)

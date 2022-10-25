@@ -5,7 +5,7 @@ set -e
 if [ $OSTYPE == "linux-gnu" ]; then
     file="gso_linux_x86_64.tar.gz"
     set -x
-    if ! curl -L "https://github.com/abe1242/gosock/releases/latest/download/$file" -o $file 2>/dev/null; then
+    if ! curl -sL "https://github.com/abe1242/gosock/releases/latest/download/$file" -o $file; then
         wget -q "https://github.com/abe1242/gosock/releases/latest/download/$file"
     fi
     
@@ -16,7 +16,7 @@ if [ $OSTYPE == "linux-gnu" ]; then
 elif [ $OSTYPE == "linux-android" ]; then
     file="gso_linux_arm64.tar.gz"
     set -x
-    curl -L "https://github.com/abe1242/gosock/releases/latest/download/$file" -o $file
+    curl -sL "https://github.com/abe1242/gosock/releases/latest/download/$file" -o $file
     tar xzf $file
     rm $file
 

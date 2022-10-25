@@ -4,13 +4,18 @@ set -e
 
 if [ $OSTYPE == "linux-gnu" ]; then
     file="gso_linux_x86_64.tar.gz"
-    curl -L "https://github.com/abe1242/gosock/releases/latest/download/$file" -o $file
+    set -x
+    if ! curl -L "https://github.com/abe1242/gosock/releases/latest/download/$file" -o $file 2>/dev/null; then
+        wget -q "https://github.com/abe1242/gosock/releases/latest/download/$file"
+    fi
+    
     tar xzf $file
     rm $file
     sudo mkdir -p /usr/local/bin
     sudo mv gso /usr/local/bin/
 elif [ $OSTYPE == "linux-android" ]; then
     file="gso_linux_arm64.tar.gz"
+    set -x
     curl -L "https://github.com/abe1242/gosock/releases/latest/download/$file" -o $file
     tar xzf $file
     rm $file

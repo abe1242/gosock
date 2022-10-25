@@ -21,10 +21,13 @@ elif [ $OSTYPE == "linux-android" ]; then
     rm $file
 
     mkdir -p ~/.local/bin
+    set +x
     if ! echo $PATH | grep -q $HOME/.local/bin; then
+        set -x
         echo 'PATH=$PATH:$HOME/.local/bin' >> ~/.profile
         source ~/.profile
     fi
+    set -x
 
     mkdir -p ~/.local/bin
     mv gso ~/.local/bin

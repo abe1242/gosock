@@ -20,7 +20,6 @@ elif [ $OSTYPE == "linux-android" ]; then
     tar xzf $file
     rm $file
 
-    mkdir -p ~/.local/bin
     set +x
     if ! echo $PATH | grep -q $HOME/.local/bin; then
         set -x

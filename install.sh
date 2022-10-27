@@ -7,6 +7,9 @@ if [ $OSTYPE == "linux-gnu" ]; then
     set -x
     if ! curl -sL "https://github.com/abe1242/gosock/releases/latest/download/$file" -o $file; then
         wget -q "https://github.com/abe1242/gosock/releases/latest/download/$file"
+        if [ $? -ne 0 ]; then
+            echo wget or curl needs to be installed
+        fi
     fi
     
     tar xzf $file

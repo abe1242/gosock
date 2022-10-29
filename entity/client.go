@@ -6,14 +6,22 @@ import (
 	"io"
 	"net"
 	"os"
+	"time"
 
 	"github.com/schollz/progressbar/v3"
 )
 
 func Client(host, port string, contnue bool) {
 	// Establishing connection with server
-	conn, err := net.Dial("tcp", host+":"+port)
-	checkExit(err)
+    var conn net.Conn
+    var err error
+    for {
+        conn, err = net.Dial("tcp", host+":"+port)
+        if err == nil {
+            break
+        }
+        time.Sleep(1 * time.Second)
+    }
 	defer conn.Close()
 
 	// Define some header variables

@@ -16,8 +16,8 @@ func Server(fpath, host, port string) {
 	s, err := net.Listen("tcp", host+":"+port)
 	checkExit(err)
 	fmt.Printf("gosock listening on %v at port %v\n", host, port)
-    fmt.Println("----------------")
-    printIPs()
+	fmt.Println("----------------")
+	printIPs()
 	defer s.Close()
 
 	for {
@@ -78,24 +78,24 @@ func Server(fpath, host, port string) {
 
 // prints all the local ipv4 addresses
 func printIPs() {
-    ifs, err := net.Interfaces()
-    checkExit(err)
-    for _, i := range ifs {
-        addrs, err := i.Addrs()
-        checkExit(err)
+	ifs, err := net.Interfaces()
+	checkExit(err)
+	for _, i := range ifs {
+		addrs, err := i.Addrs()
+		checkExit(err)
 
-        for _, addr := range addrs {
-            var ip net.IP
-            switch v := addr.(type) {
-            case *net.IPNet:
-                ip = v.IP
-            case *net.IPAddr:
-                ip = v.IP
-            }
-            if ip.To4() != nil && ! ip.IsLoopback() {
-                fmt.Printf("%v - %v\n", ip, i.Name)
-            }
-        }
-    }
-    fmt.Println()
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			if ip.To4() != nil && !ip.IsLoopback() {
+				fmt.Printf("%v - %v\n", ip, i.Name)
+			}
+		}
+	}
+	fmt.Println()
 }

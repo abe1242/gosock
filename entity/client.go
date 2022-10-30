@@ -11,7 +11,7 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-func Client(host, port string, contnue bool) {
+func Client(host, port string, contnue bool, outfile string) {
 	// Establishing connection with server
 	var conn net.Conn
 	var err error
@@ -26,6 +26,7 @@ func Client(host, port string, contnue bool) {
 
 	// Define some header variables
 	var (
+		IsStdinRead bool
 		FileSize    int64
 		FileNameLen uint16
 		FileName    string
@@ -33,6 +34,7 @@ func Client(host, port string, contnue bool) {
 	)
 
 	// Recieve header variables
+	binary.Read(conn, binary.BigEndian, &IsStdinRead)
 	binary.Read(conn, binary.BigEndian, &FileSize)
 	binary.Read(conn, binary.BigEndian, &FileNameLen)
 
@@ -45,6 +47,9 @@ func Client(host, port string, contnue bool) {
 		fmt.Fprintf(os.Stderr, "Error: Filename not received fully\n")
 	}
 	FileName = string(buf)
+	if outfile != "" {
+		FileName = outfile
+	}
 
 	// Get the filesize and set start byte if continue flag is present
 	if contnue {
@@ -60,25 +65,40 @@ func Client(host, port string, contnue bool) {
 	binary.Write(conn, binary.BigEndian, StartFrom)
 
 	// Open file
-	openflags := os.O_CREATE | os.O_WRONLY
-	if !contnue {
-		openflags |= os.O_TRUNC
+	if IsStdinRead && FileName == "-" && outfile == "" {
+		fmt.Fprintln(os.Stderr, "Data from stdin is being sent!\nPlease specify an output filename with -o option")
+		os.Exit(1)
 	}
-	f, err := os.OpenFile(FileName, openflags, 0644)
-	checkExit(err)
-	s, err := f.Seek(StartFrom, io.SeekStart)
-	checkExit(err)
-	if contnue {
-		fmt.Printf("Resuming download from %v bytes\n", s)
+	var f *os.File
+	if outfile != "-" {
+		openflags := os.O_CREATE | os.O_WRONLY
+		if !contnue {
+			openflags |= os.O_TRUNC
+		}
+		f, err = os.OpenFile(FileName, openflags, 0644)
+		checkExit(err)
+		s, err := f.Seek(StartFrom, io.SeekStart)
+		checkExit(err)
+		if contnue {
+			fmt.Fprintf(os.Stderr, "Resuming download from %v bytes\n", s)
+		}
+		defer f.Close()
+	} else {
+		f = os.Stdout
 	}
-	defer f.Close()
 
 	// Copying the data to file
+	var maxBytes int64 = -1
+	if !IsStdinRead {
+		maxBytes = FileSize - StartFrom
+	}
 	bar := progressbar.DefaultBytes(
-		FileSize-StartFrom,
+		maxBytes,
 		"Downloading",
 	)
 	_, err = io.Copy(io.MultiWriter(f, bar), conn)
 	checkExit(err)
-	fmt.Printf("File '%v' downloaded successfully\n", FileName)
+	fmt.Fprintf(os.Stderr, "File '%v' downloaded successfully\n", FileName)
+
+	f.Close()
 }

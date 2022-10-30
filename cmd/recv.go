@@ -8,10 +8,12 @@ import (
 
 var (
 	contnue bool
+	outfile string
 )
 
 func init() {
 	recvCmd.Flags().BoolVarP(&contnue, "continue", "c", false, "set this flag to resume downloads")
+	recvCmd.Flags().StringVarP(&outfile, "output", "o", "", "specify the output filename")
 
 	rootCmd.AddCommand(recvCmd)
 }
@@ -21,6 +23,6 @@ var recvCmd = &cobra.Command{
 	Short: "Recieve (or request) a file",
 	Long:  `Recieve a file from a server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		entity.Client(args[0], "8888", contnue)
+		entity.Client(args[0], "8888", contnue, outfile)
 	},
 }

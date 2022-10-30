@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"io/fs"
 	"net"
 	"os"
 	"path/filepath"
@@ -12,6 +13,9 @@ import (
 )
 
 func Server(fpath, host, port string) {
+	// Should the file be readfrom stdin
+	rstdin := fpath == "-"
+
 	// Listening for connections
 	s, err := net.Listen("tcp", host+":"+port)
 	checkExit(err)
@@ -30,37 +34,58 @@ func Server(fpath, host, port string) {
 		fmt.Printf("\nConnection from (%s)\n", conn.RemoteAddr())
 
 		// Opening file to read from
-		f, err := os.Open(fpath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			continue
+		var f *os.File
+		if !rstdin {
+			f, err = os.Open(fpath)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				continue
+			}
+		} else {
+			f = os.Stdin
 		}
 
 		// Setting up header variables
-		fileinfo, err := f.Stat()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			continue
+		var fileinfo fs.FileInfo
+		if !rstdin {
+			fileinfo, err = f.Stat()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				continue
+			}
 		}
+
 		var (
-			FileSize    int64  = fileinfo.Size()
+			IsStdinRead bool = true
+			FileSize    int64
 			FileName    string = filepath.Base(fpath)
 			FileNameLen uint16 = uint16(len([]byte(FileName)))
 			StartFrom   int64
 		)
+		if fileinfo != nil {
+			IsStdinRead = false
+			FileSize = fileinfo.Size()
+		}
 
 		// Sending the header data
+		binary.Write(conn, binary.BigEndian, IsStdinRead)
 		binary.Write(conn, binary.BigEndian, FileSize)
 		binary.Write(conn, binary.BigEndian, FileNameLen)
 		conn.Write([]byte(FileName))
 
 		// Read the start byte and set seek
 		binary.Read(conn, binary.BigEndian, &StartFrom)
-		f.Seek(StartFrom, io.SeekStart)
+		if !rstdin {
+			f.Seek(StartFrom, io.SeekStart)
+		}
 
 		// Send the file
+		var maxBytes int64 = -1
+		if !rstdin {
+			maxBytes = FileSize - StartFrom
+		}
 		bar := progressbar.DefaultBytes(
-			FileSize-StartFrom,
+			maxBytes,
 			"Sending",
 		)
 		_, err = io.Copy(io.MultiWriter(conn, bar), f)
@@ -72,6 +97,10 @@ func Server(fpath, host, port string) {
 
 		f.Close()
 		conn.Close()
+
+		if rstdin {
+			os.Exit(1)
+		}
 	}
 
 }

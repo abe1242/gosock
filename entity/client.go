@@ -99,6 +99,4 @@ func Client(host, port string, contnue bool, outfile string) {
 	_, err = io.Copy(io.MultiWriter(f, bar), conn)
 	checkExit(err)
 	fmt.Fprintf(os.Stderr, "File '%v' downloaded successfully\n", FileName)
-
-	f.Close()
 }

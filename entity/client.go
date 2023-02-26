@@ -11,7 +11,8 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-func Client(host, port string, contnue bool, outfile string) {
+func Client(host, port string, contnue, clip bool, outfile string) {
+    fmt.Println(clip)
 	// Establishing connection with server
 	var conn net.Conn
 	var err error

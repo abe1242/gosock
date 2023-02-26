@@ -52,6 +52,7 @@ func Server(fpath, host, port string, clip bool) {
             clipReader = clipGet()
             if clipReader == nil {
 				fmt.Fprintf(os.Stderr, "Error: %v\n", "could not read from clipboard")
+                os.Exit(1)
             }
 		} else {
 			f = os.Stdin

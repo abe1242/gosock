@@ -13,7 +13,7 @@ func clipGet() io.ReadCloser {
     if runtime.GOOS == "android" {
         cmd = exec.Command("termux-clipboard-get")
     } else if runtime.GOOS == "linux" {
-        cmd = exec.Command("xclip -sel clip -o")
+        cmd = exec.Command("xclip", "-sel", "clip", "-o")
     } else {
         fmt.Fprintln(os.Stderr, "Your OS doesn't support this option (--clipboard)")
         os.Exit(1);
@@ -34,7 +34,7 @@ func clipSet() io.WriteCloser {
     if runtime.GOOS == "android" {
         cmd = exec.Command("termux-clipboard-set")
     } else if runtime.GOOS == "linux" {
-        cmd = exec.Command("xclip -sel clip")
+        cmd = exec.Command("xclip", "-sel", "clip")
     } else {
         fmt.Fprintln(os.Stderr, "Your OS doesn't support this option (--clipboard)")
         os.Exit(1);

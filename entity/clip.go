@@ -21,9 +21,11 @@ func clipGet() io.ReadCloser {
     stdout, err := cmd.StdoutPipe()
     cmd.Stderr = cmd.Stdout
     if err != nil {
+        fmt.Fprintln(os.Stderr, err)
         return nil
     }
     if err = cmd.Start(); err != nil {
+        fmt.Fprintln(os.Stderr, err)
         return nil
     }
     return stdout
@@ -41,9 +43,11 @@ func clipSet() io.WriteCloser {
     }
     stdin, err := cmd.StdinPipe()
     if err != nil {
+        fmt.Fprintln(os.Stderr, err)
         return nil
     }
     if err = cmd.Start(); err != nil {
+        fmt.Fprintln(os.Stderr, err)
         return nil
     }
     return stdin

@@ -31,7 +31,7 @@ func clipGet() io.ReadCloser {
     return stdout
 }
 
-func clipSet() io.WriteCloser {
+func clipSet() (*exec.Cmd, io.WriteCloser) {
     var cmd *exec.Cmd
     if runtime.GOOS == "android" {
         cmd = exec.Command("termux-clipboard-set")
@@ -44,11 +44,11 @@ func clipSet() io.WriteCloser {
     stdin, err := cmd.StdinPipe()
     if err != nil {
         fmt.Fprintln(os.Stderr, err)
-        return nil
+        return nil, nil
     }
     if err = cmd.Start(); err != nil {
         fmt.Fprintln(os.Stderr, err)
-        return nil
+        return nil, nil
     }
-    return stdin
+    return cmd, stdin
 }

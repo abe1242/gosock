@@ -16,11 +16,11 @@ func Server(fpath, host, port string, clip bool) {
 	// Should the file be readfrom stdin
 	rstdin := fpath == "-"
 
-    // Check if filename is provided if 'clip' option is not set
-    if (!clip && fpath == "") {
-        fmt.Fprintln(os.Stderr, "Error: filename not provided")
-        os.Exit(1)
-    }
+	// Check if filename is provided if 'clip' option is not set
+	if !clip && fpath == "" {
+		fmt.Fprintln(os.Stderr, "Error: filename not provided")
+		os.Exit(1)
+	}
 
 	// Listening for connections
 	s, err := net.Listen("tcp", host+":"+port)
@@ -41,7 +41,7 @@ func Server(fpath, host, port string, clip bool) {
 
 		// Opening file to read from
 		var f *os.File
-        var clipReader io.ReadCloser
+		var clipReader io.ReadCloser
 		if !rstdin && !clip {
 			f, err = os.Open(fpath)
 			if err != nil {
@@ -49,11 +49,11 @@ func Server(fpath, host, port string, clip bool) {
 				continue
 			}
 		} else if clip {
-            clipReader = clipGet()
-            if clipReader == nil {
+			clipReader = clipGet()
+			if clipReader == nil {
 				fmt.Fprintf(os.Stderr, "Error: %v\n", "could not read from clipboard")
-                os.Exit(1)
-            }
+				os.Exit(1)
+			}
 		} else {
 			f = os.Stdin
 		}
@@ -79,10 +79,10 @@ func Server(fpath, host, port string, clip bool) {
 			IsStdinRead = false
 			FileSize = fileinfo.Size()
 		}
-        if clip {
-            FileName = "clip"
+		if clip {
+			FileName = "clip"
 			FileNameLen = uint16(len([]byte(FileName)))
-        }
+		}
 
 		// Sending the header data
 		binary.Write(conn, binary.BigEndian, IsStdinRead)
@@ -105,19 +105,19 @@ func Server(fpath, host, port string, clip bool) {
 			maxBytes,
 			"Sending",
 		)
-        if clip {
-            _, err = io.Copy(io.MultiWriter(conn, bar), clipReader)
-            if err != nil {
-                fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-                continue
-            }
-        } else {
-            _, err = io.Copy(io.MultiWriter(conn, bar), f)
-            if err != nil {
-                fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-                continue
-            }
-        }
+		if clip {
+			_, err = io.Copy(io.MultiWriter(conn, bar), clipReader)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				continue
+			}
+		} else {
+			_, err = io.Copy(io.MultiWriter(conn, bar), f)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				continue
+			}
+		}
 		fmt.Printf("File '%v' sent to %v successfully\n", FileName, conn.RemoteAddr())
 
 		f.Close()

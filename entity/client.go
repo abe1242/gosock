@@ -64,7 +64,7 @@ func Client(host, port string, contnue, clip bool, outfile string) {
 	// Send the position to start from
 	binary.Write(conn, binary.BigEndian, StartFrom)
 
-    // Setup progress bar
+	// Setup progress bar
 	var maxBytes int64 = -1
 	if !IsStdinRead {
 		maxBytes = FileSize - StartFrom
@@ -74,18 +74,18 @@ func Client(host, port string, contnue, clip bool, outfile string) {
 		"Downloading",
 	)
 
-    // Check whether the clip option is present
-    // If yes, then write to clipboard then exit.
-    var clipWriter io.WriteCloser
-    clipCmd, clipWriter := clipSet()
-    if clip {
-        _, err = io.Copy(io.MultiWriter(clipWriter, bar), conn)
-        checkExit(err)
-        clipWriter.Close()
-        clipCmd.Wait()
-        fmt.Fprintf(os.Stderr, "File '%v' copied to clipboard\n", FileName)
-        os.Exit(1)
-    }
+	// Check whether the clip option is present
+	// If yes, then write to clipboard then exit.
+	var clipWriter io.WriteCloser
+	clipCmd, clipWriter := clipSet()
+	if clip {
+		_, err = io.Copy(io.MultiWriter(clipWriter, bar), conn)
+		checkExit(err)
+		clipWriter.Close()
+		clipCmd.Wait()
+		fmt.Fprintf(os.Stderr, "File '%v' copied to clipboard\n", FileName)
+		os.Exit(1)
+	}
 
 	// Open file
 	if IsStdinRead && FileName == "-" && outfile == "" {

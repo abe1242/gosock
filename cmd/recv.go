@@ -9,7 +9,7 @@ import (
 var (
 	contnue bool
 	outfile string
-    rclip bool
+	rclip   bool
 )
 
 func init() {

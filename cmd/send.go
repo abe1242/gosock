@@ -19,12 +19,12 @@ var sendCmd = &cobra.Command{
 	Short: "Send (or serve) a file",
 	Long:  `Serve a file to those who request it`,
 	Run: func(cmd *cobra.Command, args []string) {
-        var file string
-        if len(args) > 0 {
-            file = args[0]
-        } else {
-            file = ""
-        }
+		var file string
+		if len(args) > 0 {
+			file = args[0]
+		} else {
+			file = ""
+		}
 		entity.Server(file, "0.0.0.0", "8888", sclip)
 	},
 }

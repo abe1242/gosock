@@ -76,9 +76,9 @@ func Client(host, port string, contnue, clip bool, outfile string) {
 
 	// Check whether the clip option is present
 	// If yes, then write to clipboard then exit.
-	var clipWriter io.WriteCloser
-	clipCmd, clipWriter := clipSet()
 	if clip {
+		var clipWriter io.WriteCloser
+		clipCmd, clipWriter := clipSet()
 		_, err = io.Copy(io.MultiWriter(clipWriter, bar), conn)
 		checkExit(err)
 		clipWriter.Close()
